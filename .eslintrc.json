@@ -1,0 +1,18 @@
+{
+  "extends": [
+    "canonical",
+    "canonical/prettier"
+  ],
+  "overrides": [
+    {
+      "extends": [
+        "canonical/typescript"
+      ],
+      "files": "*.ts",
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      }
+    }
+  ],
+  "root": true
+}

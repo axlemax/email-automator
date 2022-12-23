@@ -1,0 +1,26 @@
+{
+  "name": "google-workspace-automator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/axlemax/google-workspace-automator.git"
+  },
+  "author": "Zander Maxwell",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/axlemax/google-workspace-automator/issues"
+  },
+  "homepage": "https://github.com/axlemax/google-workspace-automator#readme",
+  "devDependencies": {
+    "@types/google-apps-script": "^1.0.56",
+    "eslint": "^8.29.0",
+    "eslint-config-canonical": "^37.0.3",
+    "prettier": "^2.8.1",
+    "typescript": "^4.9.4"
+  }
+}

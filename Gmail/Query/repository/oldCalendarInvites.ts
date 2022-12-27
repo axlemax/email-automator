@@ -1,9 +1,10 @@
+import Query from '..';
+
 // Based on https://github.com/motemen/gas-gmail-scripts
 export default () => {
 	const now = new Date();
 
-	// TODO cheange to extension
-	const invitationThreads = GmailApp.search('invite.ics in:inbox');
+	const invitationThreads = new Query().fileName('.ics').in('inbox').execute();
 
 	const threads: GoogleAppsScript.Gmail.GmailThread[] = [];
 
@@ -11,10 +12,8 @@ export default () => {
 		const attachments = thread.getMessages()?.[0]?.getAttachments();
 		if (!attachments) continue;
 
-		// Enchancement, filter ?
 		for (const attachment of attachments) {
-			// TODO cheange to extension
-			if (attachment.getName() !== 'invite.ics') {
+			if (!attachment.getName().endsWith('.ics')) {
 				continue;
 			}
 

@@ -11,7 +11,5 @@ export const labelProcessed = (
 	const label = GmailApp.createLabel(
 		`♛⚡ ✨🎔SCRIPT (${scriptEmoji[sourceScript]})🎔✨ 🌂📜`
 	);
-	for (const thread of threadsToProcess) {
-		thread.addLabel(label);
-	}
+	label.addToThreads(threadsToProcess);
 };

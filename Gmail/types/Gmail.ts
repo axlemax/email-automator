@@ -8,7 +8,7 @@ export type Category =
 	| 'updates';
 
 export type HasType =
-	| Star
+	| Mark
 	| 'attachment'
 	| 'document'
 	| 'drive'
@@ -17,10 +17,12 @@ export type HasType =
 	| 'spreadsheet'
 	| 'userlabels'
 	| 'youtube';
+export type GmailLabel = string;
+export type GmailLocation = 'anywhere' | 'inbox' | 'spam' | 'trash';
 export type Operation = 'archive' | 'delete' | 'trash';
-export type Star = StatusIconType | `${StarColor}-star`;
-type StarColor = 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'yellow';
-type StatusIconType =
+export type Mark = MarkIcon | `${MarkColor}-star`;
+type MarkColor = 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'yellow';
+type MarkIcon =
 	| 'blue-info'
 	| 'green-check'
 	| 'orange-guillemet'

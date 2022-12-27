@@ -1,8 +1,11 @@
 import {
-	type Star,
+	type GmailLabel
+,
+	type GmailLocation,
+	type Mark,
 	type HasType,
 	type Category,
-	type Status,
+	type Status
 } from '../types/Gmail';
 import { type Date, type Time } from '../types/dateAndTime';
 
@@ -10,7 +13,7 @@ const add0 = (number: number) => (number > 9 ? `${number}` : `0${number}`);
 
 // Same order as https://support.google.com/mail/answer/7190?hl=en
 
-export class Query {
+export default class Query {
 	private query: string;
 
 	private readonly threads: GoogleAppsScript.Gmail.GmailThread[];
@@ -90,27 +93,37 @@ export class Query {
 
 	/**
 	 * Messages that have a certain label
+	 *
+	 * @param label label(s) to use in the query
 	 */
-	public readonly label = (string_: string) => {
-		this.query += ` label:(${string_})`;
+	public readonly label = (label: GmailLabel | GmailLabel[]) => {
+		const labels = Array.isArray(label) ? label : [label];
+		this.query += ` label:(${labels.join(' ')})`;
 		return this;
 	};
 
 	/**
 	 * Messages that have a certain label
+	 *
+	 * @param type type(s) to use in the query
 	 */
-	public readonly has = (types: HasType[]) => {
-		this.query += types.map((type) => ` has:${type}`);
+	public readonly has = (type: HasType | HasType[]) => {
+		const types = Array.isArray(type) ? type : [type];
+		this.query += types.map((typeValue) => ` has:${typeValue}`);
 		return this;
 	};
 
 	/**
 	 * Helper method for stars
+	 *
+	 * @param mark type(s) of mark / star to use in the query
 	 */
-	public readonly hasStar = (starType: Star[]) => this.has(starType);
+	public readonly hasMark = (mark: Mark | Mark[]) => this.has(mark);
 
 	/**
 	 * Messages from a mailing list
+	 *
+	 * @param list list to use in the query
 	 */
 	public readonly mailingList = (list: string) => {
 		this.query += ` list:${list}`;
@@ -119,6 +132,8 @@ export class Query {
 
 	/**
 	 * Attachments with a certain name or file type
+	 *
+	 * @param filename name of file to query for
 	 */
 	public readonly fileName = (filename: string) => {
 		this.query += ` filename:${filename}`;
@@ -127,14 +142,19 @@ export class Query {
 
 	/**
 	 * Messages in any folder, including Spam and Trash
+	 *
+	 * @param location location(s) to use in query, may also be a label
 	 */
-	public readonly anywhere = () => {
-		this.query += ' in:anywhere ';
+	public readonly in = (location: GmailLocation | GmailLocation[]) => {
+		const locations = Array.isArray(location) ? location : [location];
+		this.query += ` in:(${locations.join(' ')}`;
 		return this;
 	};
 
 	/**
 	 * Starred, snoozed, unread, or read messages
+	 *
+	 * @param status status to query for
 	 */
 	public readonly is = (status: Status) => {
 		this.query += ` is:${status}`;
@@ -143,6 +163,9 @@ export class Query {
 
 	/**
 	 * Not starred, snoozed, unread, or read messages
+	 *
+	 * @param status status to filter threads by (i.e. threads that are not this status will be
+	 * returned)
 	 */
 	public readonly isNot = (status: Status) => {
 		this.query += `NOT is:${status}`;

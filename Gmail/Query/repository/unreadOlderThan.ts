@@ -1,5 +1,5 @@
-import { type Time } from '../types/dateAndTime';
-import { Query } from '.';
+import Query from '..';
+import { type Time } from '../../types/dateAndTime';
 
 export default (amount: number, interval: Time) => {
 	return `${new Query()

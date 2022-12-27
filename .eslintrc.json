@@ -11,6 +11,14 @@
       "files": "*.ts",
       "parserOptions": {
         "project": "./tsconfig.json"
+      },
+      "rules": {
+        "@typescript-eslint/comma-dangle": "off",
+        "@typescript-eslint/indent": "off",
+        "@typescript-eslint/member-delimiter-style": "off",
+        "@typescript-eslint/no-extra-parens": "off",
+        "@typescript-eslint/space-before-function-paren": "off",
+        "space-before-function-paren": "off"
       }
     }
   ],

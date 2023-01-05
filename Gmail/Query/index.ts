@@ -1,3 +1,4 @@
+import { arrayByChunk, makeArray } from '../../helpers/array';
 import {
 	type GmailLabel
 ,
@@ -16,57 +17,76 @@ const add0 = (number: number) => (number > 9 ? `${number}` : `0${number}`);
 export default class Query {
 	private query: string;
 
-	private readonly threads: GoogleAppsScript.Gmail.GmailThread[];
-
 	public constructor(startQuery: string = '') {
 		this.query = startQuery;
-		this.threads = [];
 	}
 
+	/**
+	 * Used in operations that will convert this object to a string.
+	 *
+	 * @returns the query string
+	 */
 	public readonly toString = () => this.query;
 
 	/**
 	 * Specify the sender
+	 *
+	 * @param sender sender(s) to use in the query
 	 */
-	public readonly from = (strings: string[]) => {
-		this.query += ` from:(${strings.join(' ')})`;
+	public readonly from = (sender: string[] | string) => {
+		const senders = makeArray(sender);
+		this.query += ` from:(${senders.join(' ')})`;
 		return this;
 	};
 
 	/**
 	 * Specify a recipient
+	 *
+	 * @param recipient recipient(s) to use in the query
 	 */
-	public readonly to = (strings: string[]) => {
-		this.query += ` to:(${strings.join(' ')})`;
+	public readonly to = (recipient: string[] | string) => {
+		const recipients = makeArray(recipient);
+		this.query += ` to:(${recipients.join(' ')})`;
 		return this;
 	};
 
 	/**
 	 * Specify a recipient who received a copy
+	 *
+	 * @param recipient recipient(s) to use in the query
 	 */
-	public readonly cc = (strings: string[]) => {
-		this.query += ` cc:(${strings.join(' ')})`;
+	public readonly cc = (recipient: string[] | string) => {
+		const recipients = makeArray(recipient);
+		this.query += ` cc:(${recipients.join(' ')})`;
 		return this;
 	};
 
 	/**
 	 * Specify a recipient who received a copy
+	 *
+	 * @param recipient recipient(s) to use in the query
 	 */
-	public readonly bcc = (strings: string[]) => {
-		this.query += ` bcc:(${strings.join(' ')})`;
+	public readonly bcc = (recipient: string[] | string) => {
+		const recipients = makeArray(recipient);
+		this.query += ` bcc:(${recipients.join(' ')})`;
 		return this;
 	};
 
 	/**
 	 * Words in the subject line
+	 *
+	 * @param subject subject(s) to use in the query
 	 */
-	public readonly subject = (strings: string[]) => {
-		this.query += ` subject:(${strings.join(' ')})`;
+	public readonly subject = (subject: string[] | string) => {
+		const subjects = makeArray(subject);
+		this.query += ` subject:(${subjects.join(' ')})`;
 		return this;
 	};
 
 	/**
 	 * Messages that match multiple terms
+	 *
+	 * @param strings strings to group together in the query
 	 */
 	public readonly OR = (...strings: string[]) => {
 		this.query += ` {${strings.join(' ')}}`;
@@ -75,6 +95,8 @@ export default class Query {
 
 	/**
 	 * Remove messages from your results
+	 *
+	 * @param strings strings to negate in the query
 	 */
 	public readonly NOT = (...strings: string[]) => {
 		this.query += ` -${strings.join(' -')})`;
@@ -85,8 +107,10 @@ export default class Query {
 	 * Find messages with words near each other. Use the number to say how many words apart the words can
 	 * be.
 	 * Add quotes to find messages in which the word you put first stays first.
+	 *
+	 * @param strings strings to join with "AROUND" to use in the search query
 	 */
-	public readonly around = (...strings: string[]) => {
+	public readonly around = (strings: string[]) => {
 		this.query += ` ${strings.join(' AROUND ')}`;
 		return this;
 	};
@@ -97,7 +121,7 @@ export default class Query {
 	 * @param label label(s) to use in the query
 	 */
 	public readonly label = (label: GmailLabel | GmailLabel[]) => {
-		const labels = Array.isArray(label) ? label : [label];
+		const labels = makeArray(label);
 		this.query += ` label:(${labels.join(' ')})`;
 		return this;
 	};
@@ -108,8 +132,8 @@ export default class Query {
 	 * @param type type(s) to use in the query
 	 */
 	public readonly has = (type: HasType | HasType[]) => {
-		const types = Array.isArray(type) ? type : [type];
-		this.query += types.map((typeValue) => ` has:${typeValue}`);
+		const types = makeArray(type);
+		this.query += types.map((typeValue) => ` has:${typeValue}`).join('');
 		return this;
 	};
 
@@ -146,7 +170,7 @@ export default class Query {
 	 * @param location location(s) to use in query, may also be a label
 	 */
 	public readonly in = (location: GmailLocation | GmailLocation[]) => {
-		const locations = Array.isArray(location) ? location : [location];
+		const locations = makeArray(location);
 		this.query += ` in:(${locations.join(' ')}`;
 		return this;
 	};
@@ -164,32 +188,46 @@ export default class Query {
 	/**
 	 * Not starred, snoozed, unread, or read messages
 	 *
-	 * @param status status to filter threads by (i.e. threads that are not this status will be
+	 * @param status status(es) to filter threads by (i.e. threads that are not this status will be
 	 * returned)
 	 */
-	public readonly isNot = (status: Status) => {
-		this.query += `NOT is:${status}`;
+	public readonly isNot = (status: Status | Status[]) => {
+		const statuses = makeArray(status);
+		this.query += statuses.map(stat => `NOT is:${stat}`).join('');
 		return this;
 	};
 
 	/**
-	 * Search for messages sent during a certain time period
+	 * Search for messages sent after a certain time period
+	 *
+	 * @param date to search for messages that were sent after
+	 * @param date.year year to use for search - default is this year
+	 * @param date.month month to use for search
+	 * @param date.day day to use for search
 	 */
-	public readonly after = ({ year, month, day }: Date) => {
+	public readonly after = ({ year = new Date().getFullYear(), month, day }: Date) => {
 		this.query += ` ${year}/${add0(month)}/${add0(day)}`;
 		return this;
 	};
 
 	/**
-	 * Search for messages sent during a certain time period
+	 * Search for messages sent befor a certain time period
+	 *
+	 * @param date to search for messages that were sent before
+	 * @param date.year year to use for search - default is this year
+	 * @param date.month month to use for search
+	 * @param date.day day to use for search
 	 */
-	public readonly before = ({ year, month, day }: Date) => {
+	public readonly before = ({ year = new Date().getFullYear(), month, day }: Date) => {
 		this.query += ` ${year}/${add0(month)}/${add0(day)}`;
 		return this;
 	};
 
 	/**
 	 * Search for messages older or newer than a time period
+	 *
+	 * @param amount number to use with the interval in the query
+	 * @param interval interval to use with amount in the query (e.g. "days")
 	 */
 	public readonly olderThan = (amount: number, interval: Time) => {
 		this.query += ` older_than:${amount}${interval.charAt(0)}`;
@@ -198,17 +236,21 @@ export default class Query {
 
 	/**
 	 * Search for messages older or newer than a time period
+	 *
+	 * @param amount number to use with the interval in the query
+	 * @param interval interval to use with amount in the query (e.g. "days")
 	 */
-	public readonly newerThan = (number: number, interval: Time) => {
-		this.query += ` newer_than:${number}${interval.charAt(0)}`;
+	public readonly newerThan = (amount: number, interval: Time) => {
+		this.query += ` newer_than:${amount}${interval.charAt(0)}`;
 		return this;
 	};
 
 	/**
 	 * Messages in a certain category
 	 */
-	public readonly category = (cat: Category) => {
-		this.query += ` category:${cat}`;
+	public readonly category = (category: Category | Category[]) => {
+		const categories = makeArray(category);
+		this.query += categories.map(cat => ` category:${cat}`).join('');
 		return this;
 	};
 
@@ -241,14 +283,6 @@ export default class Query {
 	};
 
 	/**
-	 * Messages with a certain message-id header
-	 */
-	public readonly Rfc822msgid = (...headers: string[]) => {
-		this.query += headers.map((header) => ` rfc822msgid:${header}`);
-		return this;
-	};
-
-	/**
 	 * Messages that have a label
 	 */
 	public readonly hasLabels = () => {
@@ -265,13 +299,44 @@ export default class Query {
 	};
 
 	/**
-	 * Executes the query and returns the resulting threads.
-	 *
-	 * @returns the result of the query so far
+	 * Messages with a certain message-id header
 	 */
-	public readonly execute = () => {
-		this.threads.push(...GmailApp.search(this.query));
-		return this.threads;
+	public readonly Rfc822msgid = (...headers: string[]) => {
+		this.query += headers.map((header) => ` rfc822msgid:${header}`).join('');
+		return this;
+	};
+
+
+	/**
+	 * Results that match a word exactly
+	 *
+	 * @param word word(s) to search for exactly in the query
+	 */
+	public readonly exactWord = (word: string[] | string) => {
+		const words = makeArray(word);
+		this.query = words.map(nextWord => ` +${nextWord}`).join('');
+		return this;
+	};
+
+/**
+ * *****************
+ * CLASS FUNCTIONS *
+ ******************
+ */
+
+	/**
+	 * Executes a callback function on all threads, chunked by size
+	 *
+	 * @param callback function to perform on each chunk
+	 * @param numberPerChunk number of threads to process at a time (default: 50)
+	 */
+	public readonly processThreads = (
+		callback: (argument: GoogleAppsScript.Gmail.GmailThread[]) => unknown,
+		numberPerChunk = 50
+	) => {
+		for (const threadChunk of arrayByChunk(GmailApp.search(this.query), numberPerChunk)) {
+			callback(threadChunk);
+		}
 	};
 
 	/**
@@ -282,4 +347,3 @@ export default class Query {
 	};
 }
 
-// TODO add function to page through query results

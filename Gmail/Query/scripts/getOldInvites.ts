@@ -1,7 +1,7 @@
 import Query from '..';
 
 // Based on https://github.com/motemen/gas-gmail-scripts
-export default () => {
+const getOldInvites = () => {
 	const now = new Date();
 	const threads: GoogleAppsScript.Gmail.GmailThread[] = [];
 
@@ -48,3 +48,5 @@ export default () => {
 
 	return threads;
 };
+
+export default getOldInvites;

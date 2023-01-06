@@ -1,16 +1,16 @@
 import { arrayByChunk, makeArray } from '../../helpers/array';
 import {
-	type GmailLabel
-,
+	type GmailLabel,
 	type GmailLocation,
 	type Mark,
 	type HasType,
 	type Category,
-	type Status
+	type Status,
 } from '../types/Gmail';
-import { type Date, type Time } from '../types/dateAndTime';
+import { type TimePeriod } from '../types/dateAndTime';
 
-const add0 = (number: number) => (number > 9 ? `${number}` : `0${number}`);
+// eslint-disable-next-line @typescript-eslint/semi
+const add0 = (number: number) => (number > 9 ? number : `0${number}`);
 
 // Same order as https://support.google.com/mail/answer/7190?hl=en
 
@@ -193,7 +193,7 @@ export default class Query {
 	 */
 	public readonly isNot = (status: Status | Status[]) => {
 		const statuses = makeArray(status);
-		this.query += statuses.map(stat => `NOT is:${stat}`).join('');
+		this.query += statuses.map((stat) => `NOT is:${stat}`).join('');
 		return this;
 	};
 
@@ -205,43 +205,45 @@ export default class Query {
 	 * @param date.month month to use for search
 	 * @param date.day day to use for search
 	 */
-	public readonly after = ({ year = new Date().getFullYear(), month, day }: Date) => {
-		this.query += ` ${year}/${add0(month)}/${add0(day)}`;
+	public readonly after = (date: Date) => {
+		this.query += ` ${date.getFullYear()}/${add0(date.getMonth())}/${add0(
+			date.getDay()
+		)}`;
 		return this;
 	};
 
 	/**
-	 * Search for messages sent befor a certain time period
+	 * Search for messages sent before a certain time period
 	 *
 	 * @param date to search for messages that were sent before
 	 * @param date.year year to use for search - default is this year
 	 * @param date.month month to use for search
 	 * @param date.day day to use for search
 	 */
-	public readonly before = ({ year = new Date().getFullYear(), month, day }: Date) => {
-		this.query += ` ${year}/${add0(month)}/${add0(day)}`;
+	public readonly before = (date: Date) => {
+		this.query += ` ${date.getFullYear()}/${add0(date.getMonth())}/${add0(
+			date.getDay()
+		)}`;
 		return this;
 	};
 
 	/**
 	 * Search for messages older or newer than a time period
 	 *
-	 * @param amount number to use with the interval in the query
-	 * @param interval interval to use with amount in the query (e.g. "days")
+	 * @param timePeriod time to search for messages older than
 	 */
-	public readonly olderThan = (amount: number, interval: Time) => {
-		this.query += ` older_than:${amount}${interval.charAt(0)}`;
+	public readonly olderThan = (timePeriod: TimePeriod) => {
+		this.query += ` older_than:${timePeriod.split(/(\d+)/u)}`;
 		return this;
 	};
 
 	/**
 	 * Search for messages older or newer than a time period
 	 *
-	 * @param amount number to use with the interval in the query
-	 * @param interval interval to use with amount in the query (e.g. "days")
+	 * @param timePeriod time to search for messages newer than
 	 */
-	public readonly newerThan = (amount: number, interval: Time) => {
-		this.query += ` newer_than:${amount}${interval.charAt(0)}`;
+	public readonly newerThan = (timePeriod: TimePeriod) => {
+		this.query += ` newer_than:${timePeriod.split(/(\d+)/u)}`;
 		return this;
 	};
 
@@ -250,7 +252,7 @@ export default class Query {
 	 */
 	public readonly category = (category: Category | Category[]) => {
 		const categories = makeArray(category);
-		this.query += categories.map(cat => ` category:${cat}`).join('');
+		this.query += categories.map((cat) => ` category:${cat}`).join('');
 		return this;
 	};
 
@@ -306,7 +308,6 @@ export default class Query {
 		return this;
 	};
 
-
 	/**
 	 * Results that match a word exactly
 	 *
@@ -314,15 +315,15 @@ export default class Query {
 	 */
 	public readonly exactWord = (word: string[] | string) => {
 		const words = makeArray(word);
-		this.query = words.map(nextWord => ` +${nextWord}`).join('');
+		this.query = words.map((nextWord) => ` +${nextWord}`).join('');
 		return this;
 	};
 
-/**
- * *****************
- * CLASS FUNCTIONS *
- ******************
- */
+	/**
+	 * *****************
+	 * CLASS FUNCTIONS *
+	 ******************
+	 */
 
 	/**
 	 * Executes a callback function on all threads, chunked by size
@@ -334,7 +335,10 @@ export default class Query {
 		callback: (argument: GoogleAppsScript.Gmail.GmailThread[]) => unknown,
 		numberPerChunk = 50
 	) => {
-		for (const threadChunk of arrayByChunk(GmailApp.search(this.query), numberPerChunk)) {
+		for (const threadChunk of arrayByChunk(
+			GmailApp.search(this.query),
+			numberPerChunk
+		)) {
 			callback(threadChunk);
 		}
 	};
@@ -346,4 +350,3 @@ export default class Query {
 		this.query = '';
 	};
 }
-

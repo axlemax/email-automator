@@ -10,9 +10,9 @@ export type Category =
 	| 'social'
 	| 'updates';
 
-	/**
-	 * Values for `has:` queries - this refers to the contents or property of a thread
-	 */
+/**
+ * Values for `has:` queries - this refers to the contents or property of a thread
+ */
 export type HasType =
 	| Mark
 	| 'attachment'
@@ -24,9 +24,9 @@ export type HasType =
 	| 'userlabels'
 	| 'youtube';
 
-	/**
-	 * Label, which has limitations but as a type is just a string - also known as folder or directory
-	 */
+/**
+ * Label, which has limitations but as a type is just a string - also known as folder or directory
+ */
 export type GmailLabel = string;
 
 /**
@@ -61,7 +61,7 @@ type MarkIcon =
 	| 'red-bang'
 	| 'yellow-bang';
 
-	/**
-	 * Status of messages - things message can "be" (e.g. a message that is important, or read)
-	 */
+/**
+ * Status of messages - things message can "be" (e.g. a message that is important, or read)
+ */
 export type Status = 'important' | 'read' | 'snoozed' | 'starred' | 'unread';

@@ -1,5 +1,5 @@
-import Query from '../Query';
-import { type TimePeriod } from '../types/dateAndTime';
+import Query from '..';
+import { type TimePeriod } from '../../types/dateAndTime';
 
 const getOldUnread = (timePeriod: TimePeriod = '30days') => {
 	return `${new Query()

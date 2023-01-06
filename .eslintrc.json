@@ -15,6 +15,12 @@
 				"@typescript-eslint/space-before-function-paren": "off",
 				"space-before-function-paren": "off"
 			}
+		},
+		{
+			"files": "src/_scripts/**/*.ts",
+			"rules": {
+				"@typescript-eslint/no-unused-vars": "off"
+			}
 		}
 	],
 	"root": true

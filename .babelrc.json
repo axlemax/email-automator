@@ -1,0 +1,13 @@
+{
+	"plugins": [
+		"@babel/plugin-syntax-typescript",
+		[
+			"babel-plugin-transform-remove-imports",
+			{
+				"ignore": ["node_modules"],
+				"removeAll": true,
+				"test": "\\.(ts)$"
+			}
+		]
+	]
+}

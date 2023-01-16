@@ -1,4 +1,4 @@
-import { arrayByChunk, makeArray } from '../../helpers/array';
+import { makeArray } from '../../helpers/array';
 import {
 	type GmailLabel,
 	type GmailLocation,
@@ -8,9 +8,15 @@ import {
 	type Status,
 } from '../types/Gmail';
 import { type TimePeriod } from '../types/dateAndTime';
+import { add0, checkQuery, getDateQuery } from './utils';
 
-// eslint-disable-next-line @typescript-eslint/semi
-const add0 = (number: number) => (number > 9 ? number : `0${number}`);
+type ProcessThreadsParameters = {
+	callback: (threads: GoogleAppsScript.Gmail.GmailThread[]) => unknown;
+	newQueryEachChunk?: boolean;
+	numberPerChunk?: number;
+};
+
+type ProcessThreads = (parameters: ProcessThreadsParameters) => void;
 
 // Same order as https://support.google.com/mail/answer/7190?hl=en
 
@@ -20,6 +26,10 @@ export default class Query {
 	public constructor(startQuery: string = '') {
 		this.query = startQuery;
 	}
+
+	// ************************************************************************** //
+	// ***************************** Query operators **************************** //
+	// ************************************************************************** //
 
 	/**
 	 * Used in operations that will convert this object to a string.
@@ -79,7 +89,7 @@ export default class Query {
 	 */
 	public readonly subject = (subject: string[] | string) => {
 		const subjects = makeArray(subject);
-		this.query += ` subject:(${subjects.join(' ')})`;
+		this.query += ` subject:"${subjects.join(' ')}"`;
 		return this;
 	};
 
@@ -94,12 +104,12 @@ export default class Query {
 	};
 
 	/**
-	 * Remove messages from your results
+	 * Negate part of the query
 	 *
 	 * @param strings strings to negate in the query
 	 */
 	public readonly NOT = (...strings: string[]) => {
-		this.query += ` -${strings.join(' -')})`;
+		this.query += `${strings.map((string_) => `-${string_}`).join(' ')}`;
 		return this;
 	};
 
@@ -107,11 +117,9 @@ export default class Query {
 	 * Find messages with words near each other. Use the number to say how many words apart the words can
 	 * be.
 	 * Add quotes to find messages in which the word you put first stays first.
-	 *
-	 * @param strings strings to join with "AROUND" to use in the search query
 	 */
-	public readonly around = (strings: string[]) => {
-		this.query += ` ${strings.join(' AROUND ')}`;
+	public readonly around = (firstString: string, secondString: string) => {
+		this.query += `${firstString} AROUND ${secondString}`;
 		return this;
 	};
 
@@ -171,7 +179,7 @@ export default class Query {
 	 */
 	public readonly in = (location: GmailLocation | GmailLocation[]) => {
 		const locations = makeArray(location);
-		this.query += ` in:(${locations.join(' ')}`;
+		this.query += ` in:(${locations.join(' ')})`;
 		return this;
 	};
 
@@ -193,7 +201,19 @@ export default class Query {
 	 */
 	public readonly isNot = (status: Status | Status[]) => {
 		const statuses = makeArray(status);
-		this.query += statuses.map((stat) => `NOT is:${stat}`).join('');
+		this.query += statuses.map((stat) => ` NOT is:${stat}`).join('');
+		return this;
+	};
+
+	/**
+	 * Not starred, snoozed, unread, or read messages
+	 *
+	 * @param location location(s) to filter threads by (i.e. threads that are not this location will be
+	 * returned)
+	 */
+	public readonly isNotIn = (location: GmailLocation | GmailLocation[]) => {
+		const locations = makeArray(location);
+		this.query += locations.map((loc) => ` NOT in:${loc}`).join('');
 		return this;
 	};
 
@@ -233,7 +253,7 @@ export default class Query {
 	 * @param timePeriod time to search for messages older than
 	 */
 	public readonly olderThan = (timePeriod: TimePeriod) => {
-		this.query += ` older_than:${timePeriod.split(/(\d+)/u)}`;
+		this.query += ` older_than:${getDateQuery(timePeriod)}`;
 		return this;
 	};
 
@@ -243,7 +263,7 @@ export default class Query {
 	 * @param timePeriod time to search for messages newer than
 	 */
 	public readonly newerThan = (timePeriod: TimePeriod) => {
-		this.query += ` newer_than:${timePeriod.split(/(\d+)/u)}`;
+		this.query += ` newer_than:${getDateQuery(timePeriod)}`;
 		return this;
 	};
 
@@ -319,34 +339,64 @@ export default class Query {
 		return this;
 	};
 
-	/**
-	 * *****************
-	 * CLASS FUNCTIONS *
-	 ******************
-	 */
+	// ************************************************************************** //
+	// *************************** Execution functions ************************** //
+	// ************************************************************************** //
 
 	/**
-	 * Executes a callback function on all threads, chunked by size
-	 *
-	 * @param callback function to perform on each chunk
-	 * @param numberPerChunk number of threads to process at a time (default: 50)
+	 * Gets the number of results returned by the current query
 	 */
-	public readonly processThreads = (
-		callback: (argument: GoogleAppsScript.Gmail.GmailThread[]) => unknown,
-		numberPerChunk = 50
-	) => {
-		for (const threadChunk of arrayByChunk(
-			GmailApp.search(this.query),
-			numberPerChunk
-		)) {
-			callback(threadChunk);
+	public readonly numberOfThreads = () => {
+		checkQuery(this.query);
+		return GmailApp.search(this.query).length;
+	};
+
+	private readonly _processThreads: ProcessThreads = ({
+		callback,
+		newQueryEachChunk = false,
+		numberPerChunk = 500,
+	}) => {
+		checkQuery(this.query);
+		Logger.log('-'.repeat(80));
+		Logger.log(`Running query: "${this}"`);
+		Logger.log('-'.repeat(80));
+
+		let startLocation = 0;
+		let queryRun = 0;
+		let threads = GmailApp.search(this.query, startLocation, numberPerChunk);
+
+		while (threads.length) {
+			callback(threads);
+			Logger.log(`Found ${threads.length} threads on query run #${queryRun++}`);
+			if (!newQueryEachChunk) startLocation += numberPerChunk;
+			threads = GmailApp.search(this.query, startLocation, numberPerChunk);
 		}
 	};
 
 	/**
-	 * Resets the query. The threads that have so far matched are kept.
+	 * Executes a callback function on all threads returned by the query, chunked
+	 * by size. If the callback will affect the results of running the query, use
+	 * `processThreadsSync()`
+	 *
+	 * @param parameters parameters to use when processing
+	 * @param parameters.callback function to perform on each chunk
+	 * @param parameters.numberPerChunk number of threads to process at a time (default: 500)
 	 */
-	public readonly newQuery = () => {
-		this.query = '';
+	public readonly processThreads: ProcessThreads = (parameters) => {
+		this._processThreads(parameters);
+	};
+
+	/**
+	 * Executes a callback function on all threads returned by the query, chunked
+	 * by size. In this version, the query will be re-executed after each group
+	 * is returned, which is useful when the callback affects the next result of
+	 * the query, ex. deleting messages
+	 *
+	 * @param parameters parameters to use when processing
+	 * @param parameters.callback function to perform on each chunk
+	 * @param parameters.numberPerChunk number of threads to process at a time (default: 500)
+	 */
+	public readonly processThreadsSync: ProcessThreads = (parameters) => {
+		this._processThreads(parameters);
 	};
 }

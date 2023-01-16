@@ -2,11 +2,11 @@ import Query from '..';
 import { type TimePeriod } from '../../types/dateAndTime';
 
 const getOldUnread = (timePeriod: TimePeriod = '30days') => {
-	return `${new Query()
+	return new Query()
 		.isNot('read')
 		.isNot('starred')
 		.isNot('important')
-		.olderThan(timePeriod)}`;
+		.olderThan(timePeriod);
 };
 
 export default getOldUnread;

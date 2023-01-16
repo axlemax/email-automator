@@ -1,0 +1,27 @@
+extends:
+  - canonical
+  - canonical/prettier
+overrides:
+  - extends:
+      - canonical/typescript
+    files: '*.ts'
+    parserOptions:
+      project: ./tsconfig.json
+    rules:
+      '@typescript-eslint/comma-dangle': off
+      '@typescript-eslint/indent': off
+      '@typescript-eslint/member-delimiter-style': off
+      '@typescript-eslint/no-extra-parens': off
+      '@typescript-eslint/space-before-function-paren': off
+      space-before-function-paren: off
+  - extends:
+      - canonical/json
+    files: '*.json'
+    rules:
+      'jsonc/indent': off
+      'jsonc/no-comments': off
+      'jsonc/sort-keys': off
+  - extends:
+      - canonical/yaml
+    files: '*.{yml,yaml}'
+root: true

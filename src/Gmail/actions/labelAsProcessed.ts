@@ -1,5 +1,24 @@
-import { scriptEmoji } from '../constants';
-import { type SourceScript } from '../types/scripts';
+const SOURCE_SCRIPTS = [
+	'Gmail-Autorecycle',
+	'Gmail-Old-Invites',
+	'Gmail-Old-Promos',
+	'Gmail-Old-Unread',
+	'Gmail-Old-Updates',
+	'Gmail-SMS-Bot-Recycler',
+] as const;
+export type SourceScript = typeof SOURCE_SCRIPTS[number];
+
+/**
+ * Neat icons to add to labels
+ */
+const scriptEmoji: Record<SourceScript, string> = {
+	'Gmail-Autorecycle': '♻️',
+	'Gmail-Old-Invites': '📅',
+	'Gmail-Old-Promos': '🤑',
+	'Gmail-Old-Unread': '🫥',
+	'Gmail-Old-Updates': '👋',
+	'Gmail-SMS-Bot-Recycler': '🤖📱',
+};
 
 /**
  * Mark one or more threads as processed by a script (in the form of a label)
@@ -15,7 +34,12 @@ export const labelProcessed = (
 ) => {
 	const threadsToProcess = Array.isArray(threads) ? threads : [threads];
 	const label = GmailApp.createLabel(
-		`♛⚡ ✨🎔SCRIPT (${scriptEmoji[sourceScript]})🎔✨ 🌂📜`
+		`🪄✨ Magic ✨🪄/${scriptEmoji[sourceScript]}`
 	);
 	label.addToThreads(threadsToProcess);
+	Logger.log(
+		`Processed ${
+			threadsToProcess.length
+		} threads, using label ${label.getName()}`
+	);
 };

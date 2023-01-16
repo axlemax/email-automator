@@ -1,5 +1,5 @@
-import Query from '../Gmail/Query';
-import { labelProcessed } from '../Gmail/actions/labelAsProcessed';
+import Query from '../../Gmail/Query';
+import { labelProcessed } from '../../Gmail/actions/labelAsProcessed';
 
 // Based on https://github.com/motemen/gas-gmail-scripts
 export const deleteOldInvites = () => {

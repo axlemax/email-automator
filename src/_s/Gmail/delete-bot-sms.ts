@@ -1,5 +1,5 @@
-import Query from '../Gmail/Query';
-import { labelProcessed } from '../Gmail/actions/labelAsProcessed';
+import Query from '../../Gmail/Query';
+import { labelProcessed } from '../../Gmail/actions/labelAsProcessed';
 
 export const deleteBotSmsEmails = () => {
 	const googleVoiceEmails = new Query()

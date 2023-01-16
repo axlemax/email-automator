@@ -1,5 +1,5 @@
-import Query from '../Gmail/Query';
-import { labelProcessed } from '../Gmail/actions/labelAsProcessed';
+import Query from '../../Gmail/Query';
+import { labelProcessed } from '../../Gmail/actions/labelAsProcessed';
 
 export const deleteOldPromos = () => {
 	const query = new Query()

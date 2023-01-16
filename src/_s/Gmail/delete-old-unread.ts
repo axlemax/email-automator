@@ -1,5 +1,5 @@
-import getOldUnread from '../Gmail/Query/scripts/getOldUnread';
-import { labelProcessed } from '../Gmail/actions/labelAsProcessed';
+import getOldUnread from '../../Gmail/Query/scripts/getOldUnread';
+import { labelProcessed } from '../../Gmail/actions/labelAsProcessed';
 
 export const deleteOldUnread = () => {
 	const query = getOldUnread('1month');

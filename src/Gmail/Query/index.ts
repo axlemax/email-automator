@@ -354,7 +354,7 @@ export default class Query {
 	private readonly _processThreads: ProcessThreads = ({
 		callback,
 		newQueryEachChunk = false,
-		numberPerChunk = 500,
+		numberPerChunk = 100,
 	}) => {
 		checkQuery(this.query);
 		Logger.log('-'.repeat(80));

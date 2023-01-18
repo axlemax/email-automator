@@ -1,10 +1,9 @@
 import Query from '../../Gmail/Query';
 import { labelProcessed } from '../../Gmail/actions/labelAsProcessed';
 
-// Based on https://github.com/motemen/gas-gmail-scripts
 export const deleteOldInvites = () => {
 	const now = new Date();
-	const threads: GoogleAppsScript.Gmail.GmailThread[] = [];
+	let count = 0;
 
 	new Query()
 		.fileName('.ics')
@@ -39,14 +38,17 @@ export const deleteOldInvites = () => {
 							`${dateReference[1]}-${dateReference[2]}-${dateReference[3]}T${dateReference[4]}:${dateReference[5]}:00.000Z`
 						);
 
+						// I'd want to process these in batches, but I don't really get many invites in Gmail
 						if (eventEnd < now) {
-							labelProcessed('Gmail-Old-Invites', threads);
-							GmailApp.moveThreadsToTrash(threads);
+							labelProcessed('Gmail-Old-Invites', thread);
+							GmailApp.moveThreadToTrash(thread);
+							count += 1;
 						}
 					}
 				}
 			},
 		});
 
-	return threads;
+	Logger.log(`Processed ${count} threads with out-of-date invites`);
+	return count;
 };

@@ -20,9 +20,14 @@ export const deleteOldInvites = () => {
 							continue;
 						}
 
+						Logger.log(
+							`Found message containing invite with subject ${thread.getFirstMessageSubject()}`
+						);
+
 						// Use ICS format to get invitation date
 						const icsContent = attachment.getDataAsString();
 						const dateReference =
+							// YearMonthDateTHhMmTzZ - 20170714T040000Z
 							/^DTEND:([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})([0-9]{2})([0-9]{2})Z$/mu.exec(
 								icsContent
 							);
@@ -31,14 +36,7 @@ export const deleteOldInvites = () => {
 						}
 
 						const eventEnd = new Date(
-							Date.UTC(
-								Number.parseInt(dateReference[1], 10),
-								Number.parseInt(dateReference[2], 10) - 1,
-								Number.parseInt(dateReference[3], 10),
-								Number.parseInt(dateReference[4], 10),
-								Number.parseInt(dateReference[5], 10),
-								Number.parseInt(dateReference[6], 10)
-							)
+							`${dateReference[1]}-${dateReference[2]}-${dateReference[3]}T${dateReference[4]}:${dateReference[5]}:00.000Z`
 						);
 
 						if (eventEnd < now) {

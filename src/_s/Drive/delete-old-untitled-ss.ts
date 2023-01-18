@@ -1,5 +1,5 @@
 export const deleteOldUntitledSpreadsheets = () => {
-	const now = new Date().getMilliseconds();
+	const now = Date.now();
 	const sheets = DriveApp.getFilesByName('Untitled spreadsheet');
 	while (sheets.hasNext()) {
 		const sheet = sheets.next();
@@ -8,8 +8,8 @@ export const deleteOldUntitledSpreadsheets = () => {
 			now - sheet.getLastUpdated().getMilliseconds() >
 			7 * 24 * 60 * 60 * 1_000
 		) {
-			// sheet.setTrashed(true);
-			Logger.log(`Found old untitled spreadsheet at ${sheet.getUrl()}`);
+			sheet.setTrashed(true);
+			Logger.log(`Processed old untitled spreadsheet at ${sheet.getUrl()}`);
 		}
 	}
 };

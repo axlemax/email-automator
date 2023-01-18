@@ -20,7 +20,7 @@ export const deleteOldInvites = () => {
 						}
 
 						Logger.log(
-							`Found message containing invite with subject ${thread.getFirstMessageSubject()}`
+							`Found message containing invite with subject "${thread.getFirstMessageSubject()}"`
 						);
 
 						// Use ICS format to get invitation date

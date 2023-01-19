@@ -1,4 +1,5 @@
 import { makeArray } from '../../helpers/array';
+import { add0, checkQuery, getDateQuery } from './utils';
 import {
 	type GmailLabel,
 	type GmailLocation,
@@ -6,9 +7,8 @@ import {
 	type HasType,
 	type Category,
 	type Status,
-} from '../types/Gmail';
-import { type TimePeriod } from '../types/dateAndTime';
-import { add0, checkQuery, getDateQuery } from './utils';
+} from '@/types/Gmail';
+import { type TimePeriod } from '@/types/Gmail/dateAndTime';
 
 type ProcessThreadsParameters = {
 	callback: (threads: GoogleAppsScript.Gmail.GmailThread[]) => unknown;

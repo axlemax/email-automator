@@ -1,5 +1,5 @@
 import Query from '..';
-import { type TimePeriod } from '../../types/dateAndTime';
+import { type TimePeriod } from '@/types/Gmail/dateAndTime';
 
 const getOldUnread = (timePeriod: TimePeriod = '30days') => {
 	return new Query()

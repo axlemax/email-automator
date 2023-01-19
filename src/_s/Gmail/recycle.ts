@@ -1,6 +1,6 @@
 import Query from '../../Gmail/Query';
 import { labelProcessed } from '../../Gmail/actions/labelAsProcessed';
-import { type TimePeriod } from '../../Gmail/types/dateAndTime';
+import { type TimePeriod } from '@/types/Gmail/dateAndTime';
 
 export const recycle = () => {
 	const labels = GmailApp.getUserLabels();

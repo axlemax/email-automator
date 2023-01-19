@@ -1,6 +1,6 @@
-import { type TimePeriod } from '../types/dateAndTime';
+import { type TimePeriod } from '@/types/Gmail/dateAndTime';
 
-export const add0 = (number: number) => (number > 9 ? number : `0${number}`);
+export const add0 = (number: number) => `${number}`.padStart(2, '0');
 
 export const checkQuery = (query = '') => {
 	if (!query) throw new Error('No query specified');

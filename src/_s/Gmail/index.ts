@@ -1,4 +1,6 @@
-const triggerFunctions = [
+const driveTriggerFunctions = ['deleteOldUntitledSpreadsheets'] as const;
+
+const gmailTriggerFunctions = [
 	'deleteBotSmsEmails',
 	'deleteOldInvites',
 	'deleteOldPromos',
@@ -7,4 +9,6 @@ const triggerFunctions = [
 	'recycle',
 ] as const;
 
-export type TriggerFunction = typeof triggerFunctions[number];
+export type TriggerFunction =
+	| typeof driveTriggerFunctions[number]
+	| typeof gmailTriggerFunctions[number];

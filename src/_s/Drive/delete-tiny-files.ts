@@ -1,3 +1,5 @@
+import { upsertFolder } from '_s/common/upsertFolder';
+
 type FileStats = {
 	biggest?: GoogleAppsScript.Drive.File;
 	count: number;
@@ -6,6 +8,8 @@ type FileStats = {
 };
 
 export const deleteTinyFiles = () => {
+	const zeroByteFolder = upsertFolder('0 Byte Files');
+
 	const allFiles = DriveApp.getFiles();
 	let count = 0;
 	const fileStats: Record<string, FileStats> = {};
@@ -28,38 +32,38 @@ export const deleteTinyFiles = () => {
 			Logger.log(`MIME type: ${fileMimeType}`);
 		}
 
-		// I wound inline these in the conditional statement, but Typescript gets all huffy about the
-		// values being possibly undefined 🙄
-		const smallestSize =
-			fileStats[fileMimeType]?.smallest?.getSize() ?? Number.POSITIVE_INFINITY;
-		const biggestSize = fileStats[fileMimeType].smallest?.getSize() ?? 1;
-
 		if (size === 0) {
 			Logger.log(`Found 0 byte file: ${file.getName()}`);
 			Logger.log(file.getUrl());
-		} else if (size < smallestSize) {
+			file.makeCopy(zeroByteFolder.getId());
+		} else if (
+			size <
+			(fileStats[fileMimeType]?.smallest?.getSize() ?? Number.POSITIVE_INFINITY)
+		) {
 			fileStats[fileMimeType].smallest = file;
-		} else if (size > biggestSize) {
+		} else if (size > (fileStats[fileMimeType].smallest?.getSize() ?? 1)) {
 			fileStats[fileMimeType].biggest = file;
 		}
-
-		Logger.log('-- File type counts --');
-		for (const [type, typeStats] of Object.entries(fileStats)) {
-			Logger.log(
-				`${'_'.repeat(18)}Type${'_'.repeat(18)}|___Count___|___Total_Size___|`
-			);
-			Logger.log(
-				`${type}`.padEnd(40) +
-					`|${typeStats.count}`.padStart(11) +
-					`|${typeStats.totalSize}`.padStart(16)
-			);
-			Logger.log(` Biggest file\t${typeStats.biggest?.getName()}`);
-			Logger.log(`\t${typeStats.biggest?.getUrl()}`);
-			Logger.log(` Smallest file\t${typeStats.smallest?.getName()}`);
-			Logger.log(`\t${typeStats.smallest?.getUrl()}`);
-			Logger.log('-'.repeat(66));
-		}
-
-		Logger.log(`TOTAL FILES: ${count}`);
 	}
+
+	Logger.log('-- File type counts --');
+	Logger.log(
+		`${'_'.repeat(18)}Type${'_'.repeat(18)}|___Count___|___Total_Size___|`
+	);
+	Logger.log('-'.repeat(66));
+
+	for (const [type, typeStats] of Object.entries(fileStats)) {
+		Logger.log(
+			`${type}`.padEnd(40) +
+				`|${typeStats.count}`.padStart(11) +
+				`|${typeStats.totalSize}`.padStart(16)
+		);
+		Logger.log(` Biggest file\t${typeStats.biggest?.getName()}`);
+		Logger.log(`\t${typeStats.biggest?.getUrl()}`);
+		Logger.log(` Smallest file\t${typeStats.smallest?.getName()}`);
+		Logger.log(`\t${typeStats.smallest?.getUrl()}`);
+		Logger.log('-'.repeat(66));
+	}
+
+	Logger.log(`TOTAL FILES: ${count}`);
 };

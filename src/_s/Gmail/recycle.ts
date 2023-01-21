@@ -1,4 +1,4 @@
-import Query from '../../Gmail/Query';
+import GmailQuery from '../../Gmail/GmailQuery';
 import { labelProcessed } from '../../Gmail/actions/labelAsProcessed';
 import { type TimePeriod } from '@/types/Gmail/dateAndTime';
 
@@ -11,12 +11,12 @@ export const recycle = () => {
 			const time = recycleLabel.split('/')[1] as TimePeriod;
 			Logger.log(`Found recycle label: ${recycleLabel}`);
 
-			const query = new Query()
+			const query = new GmailQuery()
 				.label(recycleLabel)
 				.olderThan(time)
 				.isNotIn('trash');
 			let count = 0;
-			query.processThreadsSync({
+			query.processSync({
 				callback: (threads) => {
 					labelProcessed('Gmail-Autorecycle', threads);
 					for (const thread of threads) {

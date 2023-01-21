@@ -1,5 +1,6 @@
+import Query from 'common/Query';
 import { makeArray } from '../../helpers/array';
-import { add0, checkQuery, getDateQuery } from './utils';
+import { add0, getDateQuery } from './utils';
 import {
 	type GmailLabel,
 	type GmailLocation,
@@ -10,21 +11,12 @@ import {
 } from '@/types/Gmail';
 import { type TimePeriod } from '@/types/Gmail/dateAndTime';
 
-type ProcessThreadsParameters = {
-	callback: (threads: GoogleAppsScript.Gmail.GmailThread[]) => unknown;
-	newQueryEachChunk?: boolean;
-	numberPerChunk?: number;
-};
-
-type ProcessThreads = (parameters: ProcessThreadsParameters) => void;
-
 // Same order as https://support.google.com/mail/answer/7190?hl=en
 
-export default class Query {
-	private query: string;
-
-	public constructor(startQuery: string = '') {
-		this.query = startQuery;
+export default class GmailQuery extends Query<typeof GmailApp['search']> {
+	public constructor(startQuery?: string) {
+		// eslint-disable-next-line @typescript-eslint/unbound-method
+		super(GmailApp.search, startQuery);
 	}
 
 	// ************************************************************************** //
@@ -343,60 +335,15 @@ export default class Query {
 	// *************************** Execution functions ************************** //
 	// ************************************************************************** //
 
-	/**
-	 * Gets the number of results returned by the current query
-	 */
-	public readonly numberOfThreads = () => {
-		checkQuery(this.query);
-		return GmailApp.search(this.query).length;
-	};
-
-	private readonly _processThreads: ProcessThreads = ({
-		callback,
-		newQueryEachChunk = false,
-		numberPerChunk = 100,
-	}) => {
-		checkQuery(this.query);
-		Logger.log('-'.repeat(80));
-		Logger.log(`Running query: "${this}"`);
-		Logger.log('-'.repeat(80));
-
-		let startLocation = 0;
-		let queryRun = 0;
-		let threads = GmailApp.search(this.query, startLocation, numberPerChunk);
-
-		while (threads.length) {
-			callback(threads);
-			Logger.log(`Found ${threads.length} threads on query run #${queryRun++}`);
-			if (!newQueryEachChunk) startLocation += numberPerChunk;
-			threads = GmailApp.search(this.query, startLocation, numberPerChunk);
+	public *[Symbol.iterator]() {
+		let location = 0;
+		const maxResults = 100;
+		for (const threads of super[Symbol.iterator](
+			this.query,
+			(location += maxResults),
+			maxResults
+		)) {
+			yield threads;
 		}
-	};
-
-	/**
-	 * Executes a callback function on all threads returned by the query, chunked
-	 * by size. If the callback will affect the results of running the query, use
-	 * `processThreadsSync()`
-	 *
-	 * @param parameters parameters to use when processing
-	 * @param parameters.callback function to perform on each chunk
-	 * @param parameters.numberPerChunk number of threads to process at a time (default: 500)
-	 */
-	public readonly processThreads: ProcessThreads = (parameters) => {
-		this._processThreads(parameters);
-	};
-
-	/**
-	 * Executes a callback function on all threads returned by the query, chunked
-	 * by size. In this version, the query will be re-executed after each group
-	 * is returned, which is useful when the callback affects the next result of
-	 * the query, ex. deleting messages
-	 *
-	 * @param parameters parameters to use when processing
-	 * @param parameters.callback function to perform on each chunk
-	 * @param parameters.numberPerChunk number of threads to process at a time (default: 500)
-	 */
-	public readonly processThreadsSync: ProcessThreads = (parameters) => {
-		this._processThreads(parameters);
-	};
+	}
 }

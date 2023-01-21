@@ -1,20 +1,19 @@
-import Query from '../../Gmail/Query';
-import { labelProcessed } from '../../Gmail/actions/labelAsProcessed';
+import GmailQuery from 'Gmail/GmailQuery';
+import { labelProcessed } from 'Gmail/actions/labelAsProcessed';
 
 export const deleteOldPromos = () => {
-	const query = new Query()
+	const query = new GmailQuery()
 		.category('promotions')
 		.isNot('starred')
 		.olderThan('15days')
 		.isNot('read');
 	let count = 0;
 
-	query.processThreads({
-		callback: (threads) => {
-			count += threads.length;
-			labelProcessed('Gmail-Old-Promos', threads);
-			GmailApp.moveThreadsToTrash(threads);
-		},
-	});
+	for (const threads of query) {
+		count += threads.length;
+		labelProcessed('Gmail-Old-Promos', threads);
+		GmailApp.moveThreadsToTrash(threads);
+	}
+
 	Logger.log(`Processed ${count} old promos`);
 };

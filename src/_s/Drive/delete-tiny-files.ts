@@ -1,4 +1,4 @@
-import { upsertFolder } from '_s/common/upsertFolder';
+import { upsertFolder } from 'Drive/actions/upsertFolder';
 
 type FileStats = {
 	biggest?: GoogleAppsScript.Drive.File;

@@ -1,4 +1,4 @@
-import { type TriggerFunction } from '../_s/Gmail';
+import { type TriggerFunction } from '_s/Gmail';
 
 const createTimeBasedTrigger = (
 	triggerFunction: TriggerFunction,

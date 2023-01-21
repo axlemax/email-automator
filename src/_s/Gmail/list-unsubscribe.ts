@@ -1,4 +1,4 @@
-import Query from 'Gmail/Query';
+import GmailQuery from 'Gmail/GmailQuery';
 
 // Based on https://www.labnol.org/code/19959-gmail-unsubscribe
 const getUnsubscribeMethod = (thread: GoogleAppsScript.Gmail.GmailThread) => {
@@ -46,12 +46,10 @@ const getUnsubscribeMethod = (thread: GoogleAppsScript.Gmail.GmailThread) => {
 };
 
 export const listUnsubscribe = () => {
-	const search = new Query().category('updates');
-	search.processThreads({
-		callback: (threads) => {
-			for (const thread of threads) {
-				getUnsubscribeMethod(thread);
-			}
-		},
-	});
+	const search = new GmailQuery().category('updates');
+	for (const threads of search) {
+		for (const thread of threads) {
+			getUnsubscribeMethod(thread);
+		}
+	}
 };

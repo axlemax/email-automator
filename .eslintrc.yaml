@@ -12,6 +12,10 @@ overrides:
       '@typescript-eslint/indent': off
       '@typescript-eslint/member-delimiter-style': off
       '@typescript-eslint/no-extra-parens': off
+      '@typescript-eslint/quotes':
+        - error
+        - single
+        - avoidEscape: true
       '@typescript-eslint/space-before-function-paren': off
       space-before-function-paren: off
   - extends:

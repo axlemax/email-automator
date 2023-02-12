@@ -13,6 +13,12 @@ export default abstract class DriveQuery {
 		return this;
 	};
 
+	// ************************************************************************** //
+	// **************************** Query operations **************************** //
+	// ************************************************************************** //
+
+	// From https://developers.google.com/drive/api/guides/ref-search-terms
+
 	/**
 	 * "Return items that match both queries."
 	 */

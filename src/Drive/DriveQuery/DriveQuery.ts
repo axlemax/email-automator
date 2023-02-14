@@ -1,3 +1,5 @@
+// Format according to Google's guidance:
+// "Escape single quotes in queries with \', such as 'Valentine\'s Day'."
 const formatQuery = (query: string) =>
 	query.replaceAll('\\', '\\\\').replaceAll("'", "\\'");
 
